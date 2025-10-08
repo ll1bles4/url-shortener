@@ -1,0 +1,6 @@
+env: "local"
+storage_path: "./storage/stograge.db"
+http_server:
+  address: "localhost:8080"
+  timeout: 60s
+  idle_timeout: 3s
