@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"url-shortener/internal/config"
+	"url-shortener/internal/storage/sqlite"
 )
 
 const (
@@ -15,9 +16,8 @@ const (
 
 func main() {
 	cfg := config.MustLoad()
-	fmt.Print(cfg)
-	log := setupLogger(cfg.Env)
-	log.Debug("Hello")
+	_, err := sqlite.New(cfg.StoragePath)
+	fmt.Print(err)
 }
 
 func setupLogger(env string) slog.Logger {
