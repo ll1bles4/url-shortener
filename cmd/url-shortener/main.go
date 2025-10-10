@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"url-shortener/internal/config"
+	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage/sqlite"
 )
 
@@ -16,8 +16,13 @@ const (
 
 func main() {
 	cfg := config.MustLoad()
-	_, err := sqlite.New(cfg.StoragePath)
-	fmt.Print(err)
+	log := setupLogger(cfg.Env)
+	storage, err := sqlite.New(cfg.StoragePath)
+	if err != nil {
+		log.Error("falied to init storage", sl.Err(err))
+		os.Exit(1)
+	}
+	_ = storage
 }
 
 func setupLogger(env string) slog.Logger {
