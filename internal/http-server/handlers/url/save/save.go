@@ -23,6 +23,7 @@ type Response struct {
 	Alias string `json:"alias,omitempty"`
 }
 
+//go:generate go run github.com/vektra/mockery/v3@v3.5.5 --name=URLSaver
 type URLSaver interface {
 	SaveURL(urlToSave string, alias string) (int64, error)
 }
@@ -40,7 +41,7 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
-			log.Error("failde to decode request body", sl.Err(err))
+			log.Error("failed to decode request body", sl.Err(err))
 
 			render.JSON(w, r, resp.Error("failde to decode request"))
 
@@ -77,6 +78,7 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 			log.Error("failed to add url", sl.Err(err))
 
 			render.JSON(w, r, resp.Error("failed to add url"))
+			return
 		}
 
 		log.Info("url added", slog.Int64("id", id))
