@@ -30,15 +30,14 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 		if alias == "" {
 			log.Info("alias is empty")
 
-			render.JSON(w, r, "invalid")
+			render.JSON(w, r, "invalid request")
 
 			return
 		}
 
 		resURL, err := urlGetter.GetURL(alias)
 		if errors.Is(err, storage.ErrURLNotFound) {
-			log.Info("url not found", "alias", alias)
-
+			log.Info("alias is empty", "alias", alias)
 			render.JSON(w, r, response.Error("not found"))
 
 			return

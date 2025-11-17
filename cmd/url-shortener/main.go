@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"url-shortener/internal/config"
+	"url-shortener/internal/http-server/handlers/redirect"
 	"url-shortener/internal/http-server/handlers/url/save"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage/sqlite"
@@ -30,10 +31,16 @@ func main() {
 		log.Error("falied to init storage", sl.Err(err))
 		os.Exit(1)
 	}
-	id, err := storage.SaveURL("test", "tst.yo")
 
+	id, err := storage.SaveURL("tst.ru", "testik")
 	fmt.Println(id, err)
-	url, err := storage.GetURL("ts.yo")
+	id, err = storage.SaveURL("google.com", "testik1")
+	fmt.Println(id, err)
+	id, err = storage.SaveURL("yandex.ru", "testik2")
+	fmt.Println(id, err)
+	err = storage.DeleteURL("tst.yo")
+	fmt.Print(err)
+	url, err := storage.GetURL("testik")
 	fmt.Println(url, err)
 
 	router := chi.NewRouter()
@@ -43,8 +50,16 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/url", save.New(log, storage))
+	router.Get("/{alias}", redirect.New(log, storage))
 
+	router.Route("/url", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url-shortener", map[string]string{
+			cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		}))
+
+	})
+
+	router.Post("/url", save.New(log, storage))
 	log.Info("stating server", slog.String("address", cfg.Address))
 
 	srv := &http.Server{
